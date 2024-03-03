@@ -1,12 +1,14 @@
 class Paciente:
-    def __init__(self):
+    def __init__(self): #constructor
+        #encapsulamiento (atributos privados), no podemos acceder a ellos fuera de la clase Paciente.
         self.__nombre = '' 
         self.__apellido = ''
         self.__cedula = 0 
         self.__genero = '' 
         self.__servicio = '' 
               
-    #metodos get    
+    #metodos get   
+    #Todos estos metodos son publicos para acceder a los atributos de manera "controlada"
     def verNombre(self):
         return self.__nombre 
     def verApellido(self):
@@ -30,40 +32,49 @@ class Paciente:
         self.__servicio = s 
         
 class Sistema:    
-    def __init__(self):
+    def __init__(self): #constructor
         self.__lista_pacientes = [] 
         
-    def verificarPaciente(self,buscar):
+    def verificarPaciente(self,buscar,opcion_busqueda):
         for p in self.__lista_pacientes:
-            if buscar == p.cedula or buscar.lower() in p.nombre.lower():
+            if opcion_busqueda ==1 and str(buscar) ==str(p.verCedula()): 
                 return p
-            return None
-        
+            elif opcion_busqueda == 2 and str(buscar).lower() in p.verNombre().lower():
+                return p
+            elif opcion_busqueda == 3 and str(buscar).lower() in p.verApellido().lower():
+                return p
+        return None
+    
     def ingresarPaciente(self,pac):
         self.__lista_pacientes.append(pac)
         return True
     
-    def verDatosPaciente(self, n,c,a):
-        pac = self.verificarPaciente(n)
-        if pac: #¿Se encontró el paciente?
-            return pac
-        
-        pac = self.verificarPaciente(c)
-        if pac:
-            return pac
-        
-        pac = self.verificarPaciente(a)
-        if pac:
-            return pac
-        
-        nombre_apellido = n + " " + a 
-        pac = self.verificarPaciente(nombre_apellido.strip())
-        if pac:
-            return pac
-        
+    def verDatosPaciente(self, buscar,opcion_busqueda):
+        if opcion_busqueda == 1:
+            pac = self.verificarPaciente(buscar,1)
+            if pac:
+                return pac
+        elif opcion_busqueda == 2:
+            pac = self.verificarPaciente(buscar,2)
+            if pac:
+                return pac
+        elif opcion_busqueda == 3:
+            pac = self.verificarPaciente(buscar,3)
+            if pac:
+                return pac
+            
+        #No implementé esta parte
+        else:
+            partes_nombre = buscar.split()
+            nombre = partes_nombre[0]
+            apellido = partes_nombre[1] if len(partes_nombre) > 1 else None
+            pac = self.verificarPaciente(nombre, 2) if apellido is None else self.verificarPaciente(nombre + " " + apellido, 2)
+            if pac:
+                return pac
         return None
-
-  
+        
+        #No se hace uso de la herencia, las clases paciente y sistema no heredan de otras clases.
+        #Tampoco se ve una implementacion clara de polimorfismo. Se podria implementar por ejemplo si se agregan mas metodos a la clase paciente o subclases para definir comportamientos especificos.
     def verNumeroPacientes(self):
         print("En el sistema hay: " + str(len(self.__lista_pacientes)) + " pacientes") 
 
@@ -79,7 +90,7 @@ def main():
             print("A continuacion se solicitaran los datos ...") 
             #1. Se solicitan los datos
             cedula = int(input("Ingrese la cedula: ")) 
-            if sis.verificarPaciente(cedula):
+            if sis.verificarPaciente(cedula,1):
                 print("\n<< Ya existe un paciente con esa cedula >>".upper()) 
             else:    
                 # 2. se crea un objeto Paciente
@@ -96,19 +107,26 @@ def main():
                 else:
                     print("No ingresado") 
         elif opcion == 2:
-            buscar = input("Ingrese la cedula, nombre o apellido del paciente: ")
-            pac = sis.verDatosPaciente(buscar)
-            if pac:
-                print("Nombre:",pac.verNombre())
-                print("Cedula: ", str(pac.verCedula()))
-                print("Genero: ", pac.verGenero())
-                print("Servicio:", pac.verServicio())
+            #Para simplificar el problema, pregunto al usuario el parametro de busqueda.
+            opcion_busqueda = int(input("Ingrese 1 para buscar por cédula, 2 por nombre, 3 por apellido: "))
+            if opcion_busqueda in [1,2,3]:
+                buscar = input("Ingrese la informacion del paciente: ")
+                pac = sis.verDatosPaciente(buscar,opcion_busqueda)
+                if pac:
+                    print("Nombre:",pac.verNombre())
+                    print("Cedula:",str(pac.verCedula()))
+                    print("Genero:",pac.verGenero())
+                    print("Servicio:",pac.verServicio())
+                else:
+                    print("paciente no encontrado")
             else:
-                print("No existe un paciente con ese dato")
-        elif opcion !=0:
-            continue 
+                print("opcion no valida,intente nuevamente")
+                
+
+        elif opcion ==0:
+            break
         else:
-            break 
+            print("opcion invalida, intente nuevamente")
 
 #aca el python descubre cual es la funcion principal
 if __name__ == "__main__":
